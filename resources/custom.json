@@ -1,0 +1,8 @@
+{
+  "class": "custom.solr.llm.textvectorisation.model.CustomModel",
+  "name": "customLocal",
+  "params": {
+    "endpointUrl": "http://localhost:8000/embed",
+    "fieldName": "inputs"
+  }
+}
