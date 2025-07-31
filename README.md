@@ -21,6 +21,7 @@ def embed_text(input: TextInput):
 
 ## Configure Solr for Vector Search
 
+### Configuration and Schema
 Configure a vector field within you schema.xml
 ```
   <fieldType name="vector_1024" class="solr.DenseVectorField" vectorDimension="1024"                    
@@ -46,7 +47,7 @@ Add UpdateProcessor to solrconfig.xml and register it in your updateRequestProce
 ```
 
 
-## 1. Configure Custom Model
+###  Configure Custom Model
 Create you custom model conofiguration and push it to Solr
 ```
 {
@@ -62,5 +63,11 @@ Push Json above to Solr model store
 ```
 curl -XPUT 'http://localhost:8983/solr/techproducts/schema/text-to-vector-model-store' --data-binary "@custom.json" -H 'Content-type:application/json'
 ```
+
+###
+Deploy custom classes to Solr
+
+Pack classes [CustomModel.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/model/CustomModel.java), [LazyMultiFieldTextToVectorUpdateProcessor.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessor.java) and [LazyMultiFieldTextToVectorUpdateProcessorFactory.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessorFactory.java) into your own jar and deploy it to Solr. Alternatively - if no changes to the code are made - the precompiled jar can be used:
+
    
 
