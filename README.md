@@ -1,6 +1,7 @@
 # Howto
 
 ## Create Custom Service
+Spin up your own service providing an enpoint to for vector embedding. Here we use a little Python script downloading the model 'WhereIsAI/UAE-Large-V1' from Hugging Face
 ```
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
@@ -56,6 +57,10 @@ Create you custom model conofiguration and push it to Solr
     "fieldName": "inputs"
   }
 }
+```
+Push Json above to Solr model store
+```
+curl -XPUT 'http://localhost:8983/solr/techproducts/schema/text-to-vector-model-store' --data-binary "@custom.json" -H 'Content-type:application/json'
 ```
    
 
