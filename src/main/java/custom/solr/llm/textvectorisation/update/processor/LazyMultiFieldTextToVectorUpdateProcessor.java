@@ -12,8 +12,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.llm.texttovector.model.SolrTextToVectorModel;
-import org.apache.solr.llm.textvectorisation.update.processor.TextToVectorUpdateProcessor;
+import org.apache.solr.llm.textvectorisation.model.SolrTextToVectorModel;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -34,7 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class LazyMultiFieldTextToVectorUpdateProcessor extends TextToVectorUpdateProcessor {
+public class LazyMultiFieldTextToVectorUpdateProcessor extends UpdateRequestProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -52,7 +51,8 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends TextToVectorUpdat
       SolrTextToVectorModel textToVector,
       SolrQueryRequest req,
       UpdateRequestProcessor next) {
-    super(inputField, outputField, textToVector, req, next);
+    super(next);
+
     this.schema = req.getSchema();
     this.inputField = inputField;
     this.outputField = outputField;
@@ -102,7 +102,7 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends TextToVectorUpdat
   }
 
   @SuppressWarnings("unchecked")
-  private List<Float> getFreshVectorIfChanged(
+  protected List<Float> getFreshVectorIfChanged(
       SolrDocument oldDoc, ArrayList<String> allFields, String contentFromNewDoc, final String newDocId) {
 
     if (oldDoc != null && oldDoc.getFieldValue(outputField) != null) {
@@ -127,7 +127,7 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends TextToVectorUpdat
     return vectorAsList;
   }
 
-  private SolrDocument getCurrentSolrDocFromCore(SolrCore core, String id, List<String> allFields) {
+  protected SolrDocument getCurrentSolrDocFromCore(SolrCore core, String id, List<String> allFields) {
 
     SolrClient solrClient = solrClientMap.computeIfAbsent(core.getName(), k -> new EmbeddedSolrServer(core));
 
@@ -154,7 +154,7 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends TextToVectorUpdat
     return null;
   }
 
-  private String concatenatedFieldContent(Map<String, Object> docFields, List<String> allFields) {
+  protected String concatenatedFieldContent(Map<String, Object> docFields, List<String> allFields) {
     if (additionalInputFields == null) {
       return "";
     }
@@ -164,5 +164,11 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends TextToVectorUpdat
         .filter(Objects::nonNull)
         .map(Object::toString)
         .collect(Collectors.joining(" "));
+  }
+  
+  protected boolean isNullOrEmpty(SolrInputField inputFieldContent) {
+    return (inputFieldContent == null
+        || inputFieldContent.getValue() == null
+        || inputFieldContent.getValue().toString().isEmpty());
   }
 }

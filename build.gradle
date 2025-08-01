@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-  implementation "org.apache.solr:solr-core:9.8.1"
-  implementation"org.apache.solr:solr-llm:9.8.1"
+  implementation "org.apache.solr:solr-core:9.9.0"
+  implementation"org.apache.solr:solr-llm:9.9.0"
   implementation "dev.langchain4j:langchain4j:0.35.0"
   implementation "com.fasterxml.jackson.core:jackson-core:2.18.2"
   implementation "com.fasterxml.jackson.core:jackson-databind:2.18.2"
