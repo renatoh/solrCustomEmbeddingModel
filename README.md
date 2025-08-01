@@ -1,8 +1,33 @@
+# Enhancing Semantic Search (Text to Vector) in Solr
+## Introduction
+
+With Solr 9.9.0, you get end-to-end semantic vector search built directly into Solr.
+By using a service like Hugging Face or Cohere, you can configure your model within Solr and get semantic search up and running quickly.
+Vectorization, for both indexing and search, happens entirely within Solr, so there's no need to manually handle vectors anymore.
+Despite this being a big step forward, you are still limited to third party Language Models hosted in the cloud from a few supported providers.
+
+This might be suitable to get up and running quickly, but has a number of drawbacks, such as:
+
+* Limited to models from supported providers**
+* Privacy (Your data is sent to the cloud provider)**
+* Latency
 
 
-# Setup
+I’ve expanded on what Solr provides out of the box, allowing you to easily connect your custom model running on any endpoint.
 
-## Create Custom Service
+## Additional Features
+On top of that, I’ve added two new features that make vector search even more powerful.
+### Support for Multiple Fields
+You can combine multiple text fields into a single vector representation, for example, product-name, product-description, marketing-text, etc., can all be combined into a single vector. Simply configure the additional fields you want to include in your vector.
+
+### Lazy Vectorization
+When updating a document in Solr, the new vector for that document is only recreated if the content of a field used for the vector has changed. This is achieved by fetching the existing document within the update process and checking if any field used in the vector embedding has actually changed. The vector is only regenerated if any of the relevant fields has changed.
+This minimizes expensive creation of vectors.
+
+
+## Setup
+
+### Create Custom Service
 Spin up your own service providing an enpoint to for vector embedding. Here we use a little Python script downloading the model 'WhereIsAI/UAE-Large-V1' from Hugging Face
 ```
 from fastapi import FastAPI, Request
@@ -21,9 +46,9 @@ def embed_text(input: TextInput):
     return  embedding
 ```
 
-## Configure Solr for Vector Search
+### Configure Solr for Vector Search
 
-### Configuration and Schema
+#### Configuration and Schema
 Configure a vector field within you schema.xml
 ```
   <fieldType name="vector_1024" class="solr.DenseVectorField" vectorDimension="1024"                    
@@ -49,7 +74,7 @@ Add UpdateProcessor to solrconfig.xml and register it in your updateRequestProce
 ```
 
 
-###  Configure Custom Model
+####  Configure Custom Model
 Create you custom model conofiguration and push it to Solr
 ```
 {
@@ -66,7 +91,7 @@ Push Json above to Solr model store
 curl -XPUT 'http://localhost:8983/solr/techproducts/schema/text-to-vector-model-store' --data-binary "@custom.json" -H 'Content-type:application/json'
 ```
 
-###
+##
 Deploy jar with custom classes to Solr [solrcustomeembeddingmodel.jar](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/artifact/solrcustomeembeddingmodel.jar)
 This jar just contains following classes:<br>
  [CustomModel.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/model/CustomModel.java)<br>
