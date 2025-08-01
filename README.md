@@ -1,4 +1,6 @@
-# Howto
+
+
+# Setup
 
 ## Create Custom Service
 Spin up your own service providing an enpoint to for vector embedding. Here we use a little Python script downloading the model 'WhereIsAI/UAE-Large-V1' from Hugging Face
@@ -28,11 +30,11 @@ Configure a vector field within you schema.xml
 				   similarityFunction="cosine"  knnAlgorithm="hnsw" hnswMaxConnections="16" hnswBeamWidth="100"/>
   <field name="vector_en" type="vector_1024" indexed="true" stored="true" multiValued="false" />
 ```
-Add UpdateProcessor to solrconfig.xml and register it in your updateRequestProcessorChain
+Add UpdateProcessor to solrconfig.xml and register it in your updateRequestProcessorChain. Here you can add the additiona fiedls, in this example we add manu_s and description_s. Thus he vector embedding will bee create out of the name_s, manu_s and description_s
 ```
   <updateProcessor name="textToVector" class="custom.solr.llm.textvectorisation.update.processor.LazyMultiFieldTextToVectorUpdateProcessorFactory">
    <str name="inputField">name_s</str>
-   <str name="additionalInputField">manu_s</str>
+   <str name="additionalInputField">manu_s,description_s</str>
    <str name="outputField">vector_en</str>
    <str name="model">customLocal</str>
   </updateProcessor>
@@ -65,9 +67,10 @@ curl -XPUT 'http://localhost:8983/solr/techproducts/schema/text-to-vector-model-
 ```
 
 ###
-Deploy custom classes to Solr
-
-Pack classes [CustomModel.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/model/CustomModel.java), [LazyMultiFieldTextToVectorUpdateProcessor.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessor.java) and [LazyMultiFieldTextToVectorUpdateProcessorFactory.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessorFactory.java) into your own jar and deploy it to Solr. Alternatively - if no changes to the code are made - the precompiled jar can be used:
+Deploy jar with custom classes to Solr [solrcustomeembeddingmodel.jar](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/artifact/solrcustomeembeddingmodel.jar)
+This jar just contains following classes:<br>
+ [CustomModel.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/model/CustomModel.java)<br>
+ [LazyMultiFieldTextToVectorUpdateProcessor.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessor.java)<br> [LazyMultiFieldTextToVectorUpdateProcessorFactory.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessorFactory.java) 
 
    
 
