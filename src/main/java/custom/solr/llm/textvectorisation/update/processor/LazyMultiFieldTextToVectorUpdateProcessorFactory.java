@@ -32,21 +32,7 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.apache.solr.update.processor.UpdateRequestProcessorFactory;
 
-/**
- * Vectorises a textual field value and add the resulting vector to another field.
- *
- * <p>The parameters supported are:
- *
- * <pre class="prettyprint" >
- * &lt;processor class=&quot;solr.llm.textvectorisation.update.processor.TextToVectorUpdateProcessorFactory&quot;&gt;
- *   &lt;str name=&quot;inputField&quot;&gt;textualField&lt;/str&gt;
- *   &lt;str name=&quot;outputField&quot;&gt;vectorField&lt;/str&gt;
- *   &lt;str name=&quot;model&quot;&gt;textToVectorModel&lt;/str&gt;
- * &lt;/processor&gt;
- * </pre>
- *
- * *
- */
+
 public class LazyMultiFieldTextToVectorUpdateProcessorFactory extends UpdateRequestProcessorFactory {
   private static final String INPUT_FIELD_PARAM = "inputField";
   private static final String ADDITIONAL_INPUT_FIELDS_PARAM = "additionalInputField";
