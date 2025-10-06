@@ -65,15 +65,15 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends UpdateRequestProc
   public void processAdd(AddUpdateCommand cmd) throws IOException {
     SolrInputDocument newDoc = cmd.getSolrInputDocument();
 
-    SolrInputField inputFieldContent = newDoc.get(inputField);
-
-    ArrayList<String> allFields = new ArrayList<>(Arrays.asList(additionalInputFields));
+    ArrayList<String> allFields = additionalInputFields != null ?
+        new ArrayList<>(Arrays.asList(additionalInputFields)): new ArrayList<>();
+    
     allFields.add(inputField);
     Collections.reverse(allFields);
 
     String contentFromNewDoc = concatenatedFieldContent(newDoc.toMap(new HashMap<>()), allFields);
 
-    if (!isNullOrEmpty(inputFieldContent) || !StringUtils.isBlank(contentFromNewDoc)) {
+    if (!StringUtils.isBlank(contentFromNewDoc)) {
       try {
         String newDocId = newDoc.getField("id").getValue().toString();
         SolrDocument oldDoc =
@@ -95,6 +95,8 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends UpdateRequestProc
               vectorisationFailure);
         }
       }
+    } else{
+        log.debug("Document {} does not have any content in vector-fields", newDoc.getField("id"));
     }
     if (next != null) {
       next.processAdd(cmd);
@@ -155,10 +157,6 @@ public class LazyMultiFieldTextToVectorUpdateProcessor extends UpdateRequestProc
   }
 
   protected String concatenatedFieldContent(Map<String, Object> docFields, List<String> allFields) {
-    if (additionalInputFields == null) {
-      return "";
-    }
-
     return allFields.stream()
         .map(docFields::get)
         .filter(Objects::nonNull)
