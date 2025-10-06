@@ -56,8 +56,9 @@ Configure a vector field within you schema.xml
   <field name="vector_en" type="vector_1024" indexed="true" stored="true" multiValued="false" />
 ```
 Add UpdateProcessor to solrconfig.xml and register it in your updateRequestProcessorChain. Here you can add the additiona fiedls, in this example we add manu_s and description_s. Thus he vector embedding will bee create out of the name_s, manu_s and description_s
+Additionally the TextToVectorQParserPlugin need to be registred.
 ```
-  <updateProcessor name="textToVector" class="custom.solr.llm.textvectorisation.update.processor.LazyMultiFieldTextToVectorUpdateProcessorFactory">
+<updateProcessor name="textToVector" class="custom.solr.llm.textvectorisation.update.processor.LazyMultiFieldTextToVectorUpdateProcessorFactory">
    <str name="inputField">name_s</str>
    <str name="additionalInputField">manu_s,description_s</str>
    <str name="outputField">vector_en</str>
@@ -71,6 +72,8 @@ Add UpdateProcessor to solrconfig.xml and register it in your updateRequestProce
     <processor class="solr.DistributedUpdateProcessorFactory"/>
     <processor class="solr.RunUpdateProcessorFactory"/>
   </updateRequestProcessorChain>
+
+<queryParser name="knn_text_to_vector" class="org.apache.solr.llm.textvectorisation.search.TextToVectorQParserPlugin"/>
 ```
 
 
