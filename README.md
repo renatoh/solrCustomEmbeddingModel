@@ -94,11 +94,29 @@ Push Json above to Solr model store
 curl -XPUT 'http://localhost:8983/solr/techproducts/schema/text-to-vector-model-store' --data-binary "@custom.json" -H 'Content-type:application/json'
 ```
 
-##
+### Deploying Custom jar
 Deploy jar with custom classes to Solr [solrcustomeembeddingmodel.jar](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/artifact/solrcustomeembeddingmodel.jar)
 This jar just contains following classes:<br>
  [CustomModel.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/model/CustomModel.java)<br>
  [LazyMultiFieldTextToVectorUpdateProcessor.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessor.java)<br> [LazyMultiFieldTextToVectorUpdateProcessorFactory.java](https://github.com/renatoh/solrCustomEmbeddingModel/blob/main/src/main/java/custom/solr/llm/textvectorisation/update/processor/LazyMultiFieldTextToVectorUpdateProcessorFactory.java) 
 
-   
+### Running KNN Query  
+
+####KNN Query
+```
+GET /solr/products/select?
+q={!knn_text_to_vector f=vector_en model=customLocal topK50}something to wear for an male adult&
+fl=code_s,title_txt_en&rows=25
+````
+#### Hybrid Query
+```
+GET /solr/products/select?
+q={!bool filter=$retrievalStage must=$rankingStage}&
+fl=code_s,title_t,score,lexicalScore:query($normalisedLexicalQuery)&
+retrievalStage={!bool should=$lexicalQuery should=$vectorQuery}&
+rankingStage={!func}product(query($normalisedLexicalQuery),query($vectorQuery))&
+normalisedLexicalQuery={!func}scale(query($lexicalQuery),0.1,1)&
+lexicalQuery={!type=edismax qf=title_txt_en}shirt&
+vectorQuery={!knn_text_to_vector f=vector_en model=customLocal}shirt
+```
 
